@@ -150,6 +150,30 @@ btnLogin.addEventListener("click", function (e) {
   }
 });
 
+btnClose.addEventListener("click", function (e) {
+  e.preventDefault();
+  console.log("Delete");
+
+  if (
+    currentAccount?.username === inputCloseUsername.value &&
+    currentAccount?.pin === Number(inputClosePin.value)
+  ) {
+    const index = accounts.findIndex(
+      (acc) => acc.username === currentAccount.username
+    );
+    console.log(index);
+
+    // Delete acount
+    accounts.splice(index, 1);
+
+    // Hide UI
+    containerApp.style.opacity = 0;
+
+    // Clear input fields
+    inputCloseUsername.value = inputClosePin.value = "";
+  }
+});
+
 btnTransfer.addEventListener("click", function (e) {
   e.preventDefault();
 
@@ -298,7 +322,8 @@ const max = movements.reduce((acc, mov) => {
 console.log(max);
 
 //// Find method
-// It returns the first matching element (note that it doesn't return array but one elemnt)
+// It returns the first matching element 
+// (note that it doesn't return array but one elemnt)
 // ex)
 const firstWithdrawal = movements.find(mov => mov < 0);
 console.log(movements);
@@ -308,4 +333,20 @@ console.log(accounts);
 const account = accounts.find(acc => acc.owner === 'Jessica Davis');
 console.log(account);
 
+
+//// FindeIndex method
+// It returns the first matching element's Index 
+// (note that it doesn't return array but one number)
+// ex) "copied from a project so the code desnt work here"
+// const index = accounts.findIndex(
+  //   (acc) => acc.username === currentAccount.username
+  // );
+// Calling it Returns a number like 0 or 3
+  
 */
+
+//// Some
+// returns true when given condition is met for at least one of the elemnts in the array
+// and false otherwise
+// ex)
+movements.some((mov) => mov > 0);
