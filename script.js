@@ -61,10 +61,12 @@ const inputLoanAmount = document.querySelector(".form__input--loan-amount");
 const inputCloseUsername = document.querySelector(".form__input--user");
 const inputClosePin = document.querySelector(".form__input--pin");
 
-const displayMovements = function (movements) {
+const displayMovements = function (movements, sort = false) {
   containerMovements.innerHTML = "";
 
-  movements.forEach(function (mov, i) {
+  const movs = sort ? movements.slice().sort((a, b) => a - b) : movements;
+
+  movs.forEach(function (mov, i) {
     const type = mov > 0 ? "deposit" : "withdrawal";
 
     const html = `
@@ -126,6 +128,8 @@ const updateUI = function (currentAccount) {
 
 //// Event handler
 
+/////////////// LOGIN \\\\\\\\\\\\\\\
+
 let currentAccount;
 btnLogin.addEventListener("click", function (e) {
   // Prevent form from submitting
@@ -150,6 +154,52 @@ btnLogin.addEventListener("click", function (e) {
   }
 });
 
+///////////////TRANSFER \\\\\\\\\\\\\\\
+
+btnTransfer.addEventListener("click", function (e) {
+  e.preventDefault();
+
+  const amount = Number(inputTransferAmount.value);
+  const receiverAcc = accounts.find(
+    (acc) => acc.username === inputTransferTo.value
+  );
+  // Clear input fields
+  inputTransferAmount.value = inputTransferTo.value = "";
+
+  if (
+    amount > 0 &&
+    receiverAcc &&
+    currentAccount.balance >= amount &&
+    receiverAcc?.username !== currentAccount.username
+  ) {
+    // Doing the transfer
+    currentAccount.movements.push(-amount);
+    receiverAcc.movements.push(amount);
+    // Udate UI
+    updateUI(currentAccount);
+  }
+});
+
+/////////////// LOAN \\\\\\\\\\\\\\\
+btnLoan.addEventListener("click", function (e) {
+  e.preventDefault();
+
+  const amount = Number(inputLoanAmount.value);
+  if (
+    // at least one of the movements is greater than 10 precent of the loan
+    amount > 0 &&
+    currentAccount.movements.some((mov) => mov >= amount * 0.1)
+  ) {
+    // Add movements
+    currentAccount.movements.push(amount);
+    // Update UI
+    updateUI(currentAccount);
+    // Clear Inputa
+    inputLoanAmount.value = "";
+  }
+});
+
+/////////////// CLOSE ACCOUNT \\\\\\\\\\\\\\\
 btnClose.addEventListener("click", function (e) {
   e.preventDefault();
   console.log("Delete");
@@ -174,28 +224,13 @@ btnClose.addEventListener("click", function (e) {
   }
 });
 
-btnTransfer.addEventListener("click", function (e) {
+/////////////// SORT BUTTON \\\\\\\\\\\\\\\
+let sorted = false;
+
+btnSort.addEventListener("click", function (e) {
   e.preventDefault();
-
-  const amount = Number(inputTransferAmount.value);
-  const receiverAcc = accounts.find(
-    (acc) => acc.username === inputTransferTo.value
-  );
-  // Clear input fields
-  inputTransferAmount.value = inputTransferTo.value = "";
-
-  if (
-    amount > 0 &&
-    receiverAcc &&
-    currentAccount.balance >= amount &&
-    receiverAcc?.username !== currentAccount.username
-  ) {
-    // Doing the transfer
-    currentAccount.movements.push(-amount);
-    receiverAcc.movements.push(amount);
-    // Udate UI
-    updateUI(currentAccount);
-  }
+  displayMovements(currentAccount.movements, !sorted);
+  sorted = !sorted;
 });
 
 /////////////////////////////////////////////////
@@ -293,6 +328,7 @@ const movementsDescriptions = movements.map(
 );
 console.log(movementsDescriptions);
 
+
 //// Filter method
 // (1st is Element, 2nd is the index of elemnt, 3rd is the whole array)
 // "we can omit index or array if we want to: "
@@ -321,6 +357,7 @@ const max = movements.reduce((acc, mov) => {
 });
 console.log(max);
 
+
 //// Find method
 // It returns the first matching element 
 // (note that it doesn't return array but one elemnt)
@@ -343,10 +380,110 @@ console.log(account);
   // );
 // Calling it Returns a number like 0 or 3
   
-*/
 
 //// Some
 // returns true when given condition is met for at least one of the elemnts in the array
 // and false otherwise
 // ex)
 movements.some((mov) => mov > 0);
+
+//// Every
+// returns true when given condition is met for ALL of the elemnts in the array
+// and false otherwise
+// ex)
+console.log(account4.movements.every((mov) => mov > 0));
+
+
+// Separate callback (for "DRY = dont repeat yourself" in coding)
+// ex)
+const deposit = (mov) => mov > 0;
+console.log(movements.some(deposit));
+console.log(movements.every(deposit));
+console.log(movements.filter(deposit));
+
+//// Flat method
+// adds all of the elements and nested elements of array
+// .flat(how deep we want to flat. default = 1 "Levels deep")
+// ex)
+const arr = [[1, 2, 3], [4, [5], 6], 7, 8];
+console.log(arr.flat(1));
+// returns: [1, 2, 3, 4, Array(1), 6, 7, 8]
+console.log(arr.flat(2));
+// returns: [1, 2, 3, 4, 5, 6, 7, 8]
+// ex)
+const overalBalance1 = accounts
+.map((acc) => acc.movements)
+.flat()
+.reduce((acc, mov) => acc + mov, 0);
+console.log(overalBalance1);
+
+//// FlatMap
+// basically its the flat and map methods, in one go
+// note that we can only get 1 level deep for flat method,
+// if we want to go deeper we should use flat and map seperatly.
+// ex)
+const overalBalance2 = accounts
+.flatMap((acc) => acc)
+.reduce((acc, mov) => acc + mov, 0);
+console.log(overalBalance2);
+
+
+//// Sort
+// (this will mutate the original array)
+// Strings
+const owners = ["Jonas", "Zack", "Adam", "Martha"];
+console.log(owners.sort());
+
+// Numbers
+const exampleNumbers = [200, 450, -400, 3000, -650, -130, 70, 1300];
+// Return <0 A,B (Keep order)
+// Return >0 B,A (Switch order)
+
+// Ascending
+exampleNumbers.sort((a, b) => a - b);
+console.log(exampleNumbers);
+
+// Descending
+exampleNumbers.sort((a, b) => b - a);
+console.log(exampleNumbers);
+
+//// Fill method
+const arr = [1, 2, 3, 4, 5, 6, 7];
+// .fill(1st: Element that we want to replace, 2nd: Starting replacing from, 3rd: finish replacing here )
+arr.fill("H", 3, 5);
+console.log(arr);
+//Returns: [1, 2, 3, 'H', 'H', 6, 7]
+
+// Empty array + fill method
+const x = new Array(7); // creat's an array with 7 empty sluts
+x.fill(1);
+console.log(x);
+// Returns: [1, 1, 1, 1, 1, 1, 1]
+
+//// Array.from
+const y = Array.from({ length: 7 }, () => 1);
+console.log(y);
+// Returns: [1, 1, 1, 1, 1, 1, 1]
+const z = Array.from({ length: 7 }, (_, i) => i + 1);
+console.log(z);
+// Returns: [1, 2, 3, 4, 5, 6, 7]
+// ex) creating 100 random dice rolls:
+console.log(
+  Array.from({ length: 100 }, (_, i) => Math.trunc(Math.random() * 7))
+  );
+  // Returns: [3, 2, 3, 3, 3, 1, 4, 0, 2, 5, 6, 4, 6, 2, 5, 6, 6, 5, 2, 4, 6, 6, 6, 5, 5, 1, 6, 2, 5, 4, 0, 3, 2, 3, 4, 1, 6, 0, 3, 0, 1, 4, 0, 4, 3, 6, 2, 1, 5, 4, 5, 2, 3, 0, 3, 0, 2, 0, 4, 1, 2, 3, 3, 6, 2, 5, 1, 6, 4, 0, 6, 0, 6, 3, 3, 2, 2, 0, 6, 3, 2, 6, 0, 4, 3, 2, 1, 1, 1, 3, 2, 0, 6, 6, 6, 4, 3, 5, 6, 5]
+  
+  
+*/
+// Using Array.from to making an array of movements when we click on logo
+// "we get the movement data from html directly not from objects above"
+// "only to show the power of Array.from "
+const logo = document.querySelector(".logo");
+
+logo.addEventListener("click", function () {
+  const movementsUI = Array.from(
+    document.querySelectorAll(".movements__value"),
+    (el) => Number(el.textContent)
+  );
+  console.log(movementsUI);
+});
