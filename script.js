@@ -245,6 +245,61 @@ const currencies = new Map([
 
 const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
 
+/////////////////////// Practice //////////////////////////
+// 1)
+const bankDepositSum = accounts
+  .flatMap((acc) => acc.movements)
+  .filter((mov) => mov > 0)
+  .reduce((sum, mov) => sum + mov, 0);
+console.log(bankDepositSum);
+// 1) only with reduce:
+const bankDepositSumReduce = accounts
+  .flatMap((acc) => acc.movements)
+  .reduce((sum, mov) => (mov > 0 ? sum + mov : sum), 0);
+console.log(bankDepositSumReduce);
+
+// 2)
+const numDeposits1000 = accounts
+  .flatMap((acc) => acc.movements)
+  .reduce((acc, mov) => (mov >= 1000 ? ++acc : acc), 0);
+console.log(numDeposits1000);
+
+// 3) Advanced Reduce method
+const sums = accounts
+  .flatMap((acc) => acc.movements)
+  .reduce(
+    (sums, cur) => {
+      // 1st way:
+      // cur > 0 ? (sums.deposits += cur) : (sums.withdrawals += cur);
+      // 2nd way:
+      sums[cur > 0 ? "deposits" : "withdrawals"] += cur;
+      return sums;
+    },
+    { deposits: 0, withdrawals: 0 }
+  );
+console.log(sums);
+
+// 4) This Is a Nice Title
+const convertTitleCase = function (title) {
+  // making the first word in the sentence to uppercase function:
+  const capitalize = (str) => str[0].toUpperCase() + str.slice(1);
+
+  const exceptions = ["a", "and", "an", "the", "but", "or", "on", "in", "with"];
+
+  const titleCase = title
+    .toLowerCase()
+    .split(" ")
+    .map((word) =>
+      exceptions.includes(word) ? word : word[0].toUpperCase() + word.slice(1)
+    )
+    .join(" ");
+  return capitalize(titleCase);
+};
+
+console.log(convertTitleCase("this is a nice title"));
+console.log(convertTitleCase("this is a LONG title but not too long"));
+console.log(convertTitleCase("and is another title with an EXAMPLE"));
+
 /////////////////////////////////////////////////
 /*
 
